@@ -14,7 +14,7 @@ export default function HomePage() {
         // 未ログインの場合はログインページへ
         navigate("/login");
       } else {
-        setEmail(data.session.user.email);
+        setEmail(data.session.user.email ?? null);
       }
     })();
   }, [navigate]);

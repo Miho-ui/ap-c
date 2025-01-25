@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { supabase } from "../supabase";
 import { useNavigate } from "react-router-dom";
 import {
@@ -17,7 +17,7 @@ export default function SignupPage() {
 
   const handleSignup = async () => {
     try {
-      const { data, error } = await supabase.auth.signUp({
+      const { error } = await supabase.auth.signUp({
         email,
         password,
       });

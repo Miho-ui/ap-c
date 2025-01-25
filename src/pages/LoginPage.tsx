@@ -18,7 +18,7 @@ export default function LoginPage() {
   const handleLogin = async () => {
     // Supabase の認証 API でログイン
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
+      const { error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
