@@ -264,7 +264,7 @@ export default function HomePage() {
   };
 
   // 繰越計算 (今月の総収入 - 総支出)
-  const calculateCarryOver = (month: string, forcedData?: any) => {
+  const calculateCarryOver = (month: string) => {
     const income = getIncome(month);
     if (!income) return;
     const totalIncome = income.salary + income.carryOver;
