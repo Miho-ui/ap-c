@@ -158,13 +158,7 @@ export default function HomePage() {
       ...prev,
       [month]: income,
     }));
-    // 設定後に繰越再計算
-    calculateCarryOver(month, {
-      ...monthExpenses,
-      ...monthIncomes,
-      ...monthBudgets,
-      ...carryOverAmounts,
-    });
+    calculateCarryOver(month);
   };
 
   // 合計支出を取得
