@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   Button,
   TextField,
@@ -13,7 +13,6 @@ import {
   Box,
 } from "@mui/material";
 import { useHouseholdLedger } from "./hooks/useHouseholdLedger";
-import { ExpenseItem } from "./models/ExpenseItem";
 
 const EXPENSE_ITEMS = [
   "家賃",
