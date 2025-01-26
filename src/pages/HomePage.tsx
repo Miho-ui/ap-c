@@ -126,11 +126,11 @@ export default function HomePage() {
       console.error("Failed to save data to localStorage", err);
     }
   };
-
+  
   // ----------------------------------------------------------------
   // 家計簿のロジック
   // ----------------------------------------------------------------
-
+  
   // 前月文字列
   const getPreviousMonth = (month: string) => {
     const [yearStr, monthStr] = month.split("-");
@@ -146,49 +146,48 @@ export default function HomePage() {
       .toString()
       .padStart(2, "0")}`;
   };
-
+  
   // 該当月の income を取得
   const getIncome = (month: string): Income | null => {
     return monthIncomes[month] || null;
   };
-
+  
   // 収入設定
   const setIncome = (month: string, income: Income) => {
     setMonthIncomes((prev) => ({
       ...prev,
       [month]: income,
     }));
-    calculateCarryOver(month);
   };
-
+  
   // 合計支出を取得
   const getTotalExpenses = (month: string): number => {
     const items = monthExpenses[month] || [];
     return items.reduce((sum, item) => sum + item.amount, 0);
   };
-
+  
   // 合計予算を取得
   const getTotalBudget = (month: string): number => {
     const buds = monthBudgets[month] || [];
     return buds.reduce((sum, b) => sum + b.amount, 0);
   };
-
+  
   // 繰越額を取得
   const getCarryOver = (month: string): number => {
     return carryOverAmounts[month] || 0;
   };
-
+  
   // 支出追加
   const addExpense = (month: string, expense: ExpenseItem): boolean => {
     const income = getIncome(month);
     const totalIncome = income ? income.salary + income.carryOver : 0;
     const currentExpenses = getTotalExpenses(month);
-
+  
     if (currentExpenses + expense.amount > totalIncome) {
       alert("エラー: 収入を超える支出は行えません。");
       return false;
     }
-
+  
     setMonthExpenses((prev) => {
       const oldList = prev[month] || [];
       let found = false;
@@ -207,12 +206,10 @@ export default function HomePage() {
         [month]: updatedList,
       };
     });
-
-    // 終了後、繰越再計算
-    setTimeout(() => calculateCarryOver(month), 0);
-    return true;
+  
+    return true; // 繰越再計算は useEffect に任せる
   };
-
+  
   // 支出修正（指定項目から減額）
   const reduceExpense = (month: string, expense: ExpenseItem) => {
     setMonthExpenses((prev) => {
@@ -239,10 +236,8 @@ export default function HomePage() {
         [month]: updatedList,
       };
     });
-    // 終了後、繰越再計算
-    setTimeout(() => calculateCarryOver(month), 0);
   };
-
+  
   // 予算計算 (前月の支出をもとに *1.05 で算出)
   const calculateBudget = (currentMonth: string) => {
     const prevMonth = getPreviousMonth(currentMonth);
@@ -256,7 +251,7 @@ export default function HomePage() {
       [currentMonth]: newBudgets,
     }));
   };
-
+  
   // 繰越計算 (今月の総収入 - 総支出)
   const calculateCarryOver = (month: string) => {
     const income = getIncome(month);
@@ -270,7 +265,7 @@ export default function HomePage() {
       [month]: carry,
     }));
   };
-
+  
   // 今月の家計簿をクリア
   const clearLedger = (month: string) => {
     const co = getCarryOver(month);
@@ -284,7 +279,7 @@ export default function HomePage() {
       },
     }));
   };
-
+  
   // 全部削除
   const clearAll = () => {
     setMonthExpenses({});
@@ -292,12 +287,11 @@ export default function HomePage() {
     setMonthIncomes({});
     setCarryOverAmounts({});
   };
-
+  
   // ----------------------------------------------------------------
   // 各種UIのイベントハンドラ
   // ----------------------------------------------------------------
-
-  // 給料入力(収入設定)
+  
   const handleSetIncome = () => {
     const salaryNum = parseFloat(salaryInput) || 0;
     const prevMonth = getPreviousMonth(currentMonth);
@@ -308,8 +302,7 @@ export default function HomePage() {
     };
     setIncome(currentMonth, newIncome);
   };
-
-  // 支出追加
+  
   const handleAddExpense = () => {
     const inc = getIncome(currentMonth);
     if (!inc || (inc.salary === 0 && inc.carryOver === 0)) {
@@ -322,8 +315,7 @@ export default function HomePage() {
       amount: amountNum,
     });
   };
-
-  // 支出修正
+  
   const handleReduceExpense = () => {
     const inc = getIncome(currentMonth);
     if (!inc || (inc.salary === 0 && inc.carryOver === 0)) {
@@ -336,7 +328,7 @@ export default function HomePage() {
       amount: amountNum,
     });
   };
-
+  
   const handleCalculateBudget = () => {
     const inc = getIncome(currentMonth);
     if (!inc || (inc.salary === 0 && inc.carryOver === 0)) {
@@ -345,17 +337,25 @@ export default function HomePage() {
     }
     calculateBudget(currentMonth);
   };
-
+  
   const handleClearLedger = () => {
     clearLedger(currentMonth);
     setSalaryInput("");
   };
-
-  // ログアウト
+  
   const handleLogout = async () => {
     await supabase.auth.signOut();
     navigate("/login");
   };
+  
+  // ----------------------------------------------------------------
+  // useEffect: 繰越計算を監視
+  // ----------------------------------------------------------------
+  useEffect(() => {
+    if (!currentMonth) return;
+    calculateCarryOver(currentMonth);
+  }, [monthIncomes, monthExpenses, currentMonth]);
+  
 
   // ----------------------------------------------------------------
   // 表示用
